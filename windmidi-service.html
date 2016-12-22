@@ -1,0 +1,88 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script>
+var _windMIDIServiceInstances = [];
+
+function _windMIDIServiceFireEvent(data) {
+    _windMIDIServiceInstances.forEach( instance => {
+        instance.fire('windmidi-service-event', data);
+    });
+}
+
+function _onMIDIEvent(event) {
+    var data = event.data;
+    switch(data[0]) {
+        case 0xE0: // 224 = pitch bend
+            _windMIDIServiceFireEvent({
+                type: "pitch",
+                value: data[1] + (data[2] << 7)
+            });
+            break;
+        case 0xD0: // 208 = pressure/after-touch
+            _windMIDIServiceFireEvent({
+                type: "pressure",
+                value: data[1]
+            });
+            break;
+
+    }
+    //console.log(event.data);
+}
+
+/**
+ * `WindMIDIService` is a polymer test behavior providing a service for midi wind controllers.
+ *
+ *
+ * @demo demo/index.html
+ * @polymerBehavior
+ */
+WindMIDIService = {
+    properties: {
+        /**
+         * Globals
+         */
+        _service: {
+            type: Object,
+            value: {
+                midi: null
+            },
+            readonly: true
+        }
+    },
+
+    registered: function() {
+        function onSuccess(midi) {
+            WindMIDIService.properties._service.value.midi = midi;
+
+            var inputs = midi.inputs.values();
+            for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
+                input.value.onmidimessage = _onMIDIEvent;
+            }
+        }
+
+        function onFailure(error) {
+            console.log("WindMIDIService error: " + error);
+        }
+
+        if (navigator.requestMIDIAccess) {
+            navigator.requestMIDIAccess({
+                sysex: false
+            }).then(onSuccess, onFailure);
+        } else {
+             console.log("WindMIDIService error: WebMIDI not supported.");
+        }
+    },
+
+    attached: function() {
+       _windMIDIServiceInstances.push(this);
+    },
+
+    detached: function() {
+        var i = _windMIDIServiceInstances.indexOf(this);
+        if (i >= 0) {
+            _windMIDIServiceInstances.splice(i, 1);
+        }
+    }
+};
+</script>
+

@@ -1,0 +1,7 @@
+{
+  "devel": true,
+  "browser": true,
+  "unused": true,
+  "esversion": 6,
+  "predef": [ "MY_GLOBAL" ]
+}

@@ -1,0 +1,37 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../windmidi-service.html">
+
+<dom-module id="windmidi-tester">
+  <template>
+    <h2>WindMIDI tester</h2>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'windmidi-tester',
+
+      properties: {
+      },
+
+      behaviors: [WindMIDIService],
+
+      listeners: {
+        'windmidi-service-event': 'handleData'
+      },
+
+
+      handleData: function(evt) {
+        var data = evt.detail;
+        // todo: something cool with the rest of the midi events :)
+        //console.log("event", data);
+      }
+
+
+
+    });
+
+  </script>
+
+</dom-module>

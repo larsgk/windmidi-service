@@ -1,0 +1,40 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../poly-graph/poly-graph.html">
+<link rel="import" href="../windmidi-service.html">
+
+<dom-module id="windmidi-graph">
+  <template>
+    <poly-graph id="polygraph" style="height:300px" resolution="50" min="0" max="16384"></poly-graph>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'windmidi-graph',
+
+      behaviors: [WindMIDIService],
+
+      listeners: {
+        'windmidi-service-event': 'handleData'
+      },
+
+      attached: function() {
+        var el = this.$.polygraph;
+
+        el.addPen('pitch', {color:'#0d0', name:'Pitch'});
+        el.addPen('pressure', {color:'#00d', name:'Pressure'});
+      },
+
+      handleData: function(evt) {
+        var data = evt.detail;
+        if(data.type === "pitch") {
+          this.$.polygraph.addValue('pitch', data.value);
+        } else if(data.type === "pressure") {
+          this.$.polygraph.addValue('pressure', data.value << 7);          
+        }
+      }
+
+    });
+
+  </script>
+
+</dom-module>

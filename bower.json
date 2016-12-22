@@ -1,0 +1,15 @@
+{
+  "name": "windmidi-service",
+  "description": "Polymer test behavior providing a service for midi wind controllers.",
+  "main": "windmidi-service.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.7.1",
+    "paper-fab": "PolymerElements/paper-fab#^1.2.0",
+    "poly-graph": "larsgk/poly-graph#~0.0.4"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
+    "web-component-tester": "^4.0.0"
+  }
+}
