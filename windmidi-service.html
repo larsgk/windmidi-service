@@ -11,7 +11,6 @@
  * @polymerBehavior
  */
 const WindMIDIService = {
-
     _fireEvent(data) {
         WindMIDIService.instances.forEach( instance => {
             instance.fire('windmidi-service-event', data);
@@ -55,7 +54,7 @@ const WindMIDIService = {
         if(WindMIDIService.instances)
             return;
 
-        Object.defineProperty(WindMIDIService, "instances", {  
+        Object.defineProperty(WindMIDIService, "instances", {
             value: [],
             writable: false,
             enumerable: false,
@@ -73,7 +72,7 @@ const WindMIDIService = {
                     input.value.onmidimessage = _onMIDIEvent;
                 }
             },
-            error => console.log("WindMIDIService error: " + error););
+            error => console.log("WindMIDIService error: " + error));
         } else {
              console.log("WindMIDIService error: WebMIDI not supported.");
         }
