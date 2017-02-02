@@ -1,33 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 
 <script>
-var _windMIDIServiceInstances = [];
-
-function _windMIDIServiceFireEvent(data) {
-    _windMIDIServiceInstances.forEach( instance => {
-        instance.fire('windmidi-service-event', data);
-    });
-}
-
-function _onMIDIEvent(event) {
-    var data = event.data;
-    switch(data[0]) {
-        case 0xE0: // 224 = pitch bend
-            _windMIDIServiceFireEvent({
-                type: "pitch",
-                value: data[1] + (data[2] << 7)
-            });
-            break;
-        case 0xD0: // 208 = pressure/after-touch
-            _windMIDIServiceFireEvent({
-                type: "pressure",
-                value: data[1]
-            });
-            break;
-
-    }
-    //console.log(event.data);
-}
+"use strict";
 
 /**
  * `WindMIDIService` is a polymer test behavior providing a service for midi wind controllers.
@@ -36,7 +10,34 @@ function _onMIDIEvent(event) {
  * @demo demo/index.html
  * @polymerBehavior
  */
-WindMIDIService = {
+const WindMIDIService = {
+
+    _fireEvent(data) {
+        WindMIDIService.instances.forEach( instance => {
+            instance.fire('windmidi-service-event', data);
+        });
+    },
+
+    _onMIDIEvent(event) {
+    var data = event.data;
+    switch(data[0]) {
+        case 0xE0: // 224 = pitch bend
+            WindMIDIService._fireEvent({
+                type: "pitch",
+                value: data[1] + (data[2] << 7)
+            });
+            break;
+        case 0xD0: // 208 = pressure/after-touch
+            WindMIDIService._fireEvent({
+                type: "pressure",
+                value: data[1]
+            });
+            break;
+
+        }
+        //console.log(event.data);
+    },
+
     properties: {
         /**
          * Globals
@@ -50,37 +51,42 @@ WindMIDIService = {
         }
     },
 
-    registered: function() {
-        function onSuccess(midi) {
-            WindMIDIService.properties._service.value.midi = midi;
+    registered() {
+        if(WindMIDIService.instances)
+            return;
 
-            var inputs = midi.inputs.values();
-            for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
-                input.value.onmidimessage = _onMIDIEvent;
-            }
-        }
-
-        function onFailure(error) {
-            console.log("WindMIDIService error: " + error);
-        }
+        Object.defineProperty(WindMIDIService, "instances", {  
+            value: [],
+            writable: false,
+            enumerable: false,
+            configurable: false
+        });
 
         if (navigator.requestMIDIAccess) {
             navigator.requestMIDIAccess({
                 sysex: false
-            }).then(onSuccess, onFailure);
+            }).then(midi => {
+                WindMIDIService.properties._service.value.midi = midi;
+
+                var inputs = midi.inputs.values();
+                for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
+                    input.value.onmidimessage = _onMIDIEvent;
+                }
+            },
+            error => console.log("WindMIDIService error: " + error););
         } else {
              console.log("WindMIDIService error: WebMIDI not supported.");
         }
     },
 
     attached: function() {
-       _windMIDIServiceInstances.push(this);
+       WindMIDIService.instances.push(this);
     },
 
     detached: function() {
-        var i = _windMIDIServiceInstances.indexOf(this);
+        var i = WindMIDIService.instances.indexOf(this);
         if (i >= 0) {
-            _windMIDIServiceInstances.splice(i, 1);
+            WindMIDIService.instances.splice(i, 1);
         }
     }
 };
